@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'org.airwhale.aams'
-version = '1.0-SNAPSHOT'
+version = 'ALPHA-1.0'
 
 repositories {
     mavenCentral()
@@ -12,8 +12,28 @@ repositories {
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation 'org.fusesource.jansi:jansi:2.4.1'
 }
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    enabled = true
+
+    from { // 의존성 포함
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+
+    manifest {
+        attributes(
+                "Class-Path": configurations.runtimeClasspath.files.collect { it.getName() }.join(' '),
+                "Main-Class": "org.airwhale.aams.Main"
+        )
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE  // 중복처리
 }
