@@ -29,7 +29,7 @@ AAMS 사용을 원하시는 경우, 사내 디스코드의 공지 페이지를 �
 ## 문의
 <br/>
 Airwhale CEO : Skywhale#0735<br/>
-AAMS Development : Dwk0910#4491 (HL8266 Pilot)
+AAMS Development : @neatore (HL8266 Pilot)
 <br/><br/>
 
 **본 프로그램은 에어웨일에서 사용하는 프로그램으로, 외부에서의 사용이 엄격히 금지되어 있습니다.**<br/>
