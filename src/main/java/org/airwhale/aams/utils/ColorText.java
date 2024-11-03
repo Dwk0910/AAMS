@@ -12,6 +12,7 @@ public class ColorText {
         Ansi result = new Ansi();
         switch (color) {
             case "black" -> result = Ansi.ansi().fgBlack();
+            case "gray" -> result = Ansi.ansi().fg(158200);
             case "red" -> result = Ansi.ansi().fgRed();
             case "green" -> result = Ansi.ansi().fgGreen();
             case "yellow" -> result = Ansi.ansi().fgYellow();
