@@ -12,7 +12,7 @@ public class PrintMessage {
         }
 
         return ColorText.text("[", "gray", "none", false) +
-                ColorText.text("Simdev", "cyan", "none", true) +
+                ColorText.text("AAMS", "cyan", "none", true) +
                 ColorText.text("/", "orange", "none", false) +
                 ColorText.text(type.toUpperCase(), color, "none", true) +
                 ColorText.text("]", "gray", "none", false) + " : " +
@@ -22,7 +22,7 @@ public class PrintMessage {
     /*
     [ERRORCODE]
 
-    - TYPE D (-edly, Simdev가 Crash될 정도의 치명적인 오류) -
+    - TYPE D (-edly, AAMS가 Crash될 정도의 치명적인 오류) -
 
     D-0001류 : (IOException, ParseException) cause에 발생파일 명시하기!
     ㄴ D-0001A : write 오류
@@ -30,12 +30,15 @@ public class PrintMessage {
     ㄴ D-0001C : create 오류
     ㄴ D-0001D : (ParseException) 파일 손상으로 간주
 
+    D-0002 : 서버연결불량 (Http response code 출력하기)
+
     - TYPE G (-eneral, 일반적인 경고식 오류) -
     G-0001류 (TYPE G) : Simdev 프로젝트 설정파일을 찾을 수 없음.
     ㄴ G-0001A : devinf.dat
     ㄴ * 추가예정 *
 
     */
+
     // Error Print Mehod
     public static void Error(int type, String errorcode, String cause, Boolean... waitsec) {
         switch (type) {
