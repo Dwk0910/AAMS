@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Class-Path: jansi-2.4.1.jar progressbar-0.10.1.jar jline-terminal-3.24.1
- .jar jline-native-3.24.1.jar
+Class-Path: jansi-2.4.1.jar json-simple-1.1.1.jar junit-4.10.jar hamcres
+ t-core-1.1.jar
 Main-Class: org.airwhale.aams.Main
 

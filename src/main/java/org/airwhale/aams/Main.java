@@ -1,42 +1,48 @@
 package org.airwhale.aams;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.net.*;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.HttpURLConnection;
+import java.util.List;
+import java.util.Scanner;
+import java.util.ArrayList;
 
 import org.airwhale.aams.utils.ColorText;
 import org.airwhale.aams.utils.MiniUtils;
 import org.airwhale.aams.utils.PrintMessage;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 public class Main {
     public static String version = "ALPHA-1.0";
+    public static Scanner scan = new Scanner(System.in);
     public static void main(String[] args) throws IOException, URISyntaxException {
         System.out.println(PrintMessage.get("Airwhale Aircraft Management System [ " + version + " ]", "info"));
         System.out.format(PrintMessage.get("데이터베이스 서버를 등록합니다...", "info") + "\r");
 
         List<String> urllist = new ArrayList<>();
-        urllist.add("https://neatorebackend.kro.kr/aams/Login.php");
-        urllist.add("https://neatorebackend.kro.kr/aams/Notification.php");
-        urllist.add("https://neatorebackend.kro.kr/aams/SysMail.php");
-        urllist.add("https://neatorebackend.kro.kr/aams/AAMS_update.php");
-        urllist.add("https://neatorebackend.kro.kr/aams/Aircrafts.php");
-        urllist.add("https://neatorebackend.kro.kr/aams/Employees.php");
+        String urlhost = "https://port-9000-aamsbackend-m55ddohi02e930d2.sel4.cloudtype.app/";
+        urllist.add("https://dslwiki.kro.kr/backend/aams/Login.php");
+        urllist.add("https://dslwiki.kro.kr/backend/aams/Notification.php");
+        urllist.add("https://dslwiki.kro.kr/backend/aams/SysMail.php");
+        urllist.add("https://dslwiki.kro.kr/backend/aams/AAMS_update.php");
+        urllist.add("https://dslwiki.kro.kr/backend/aams/Aircrafts.php");
+        urllist.add("https://dslwiki.kro.kr/backend/aams/Employees.php");
         MiniUtils.pause(500);
         System.out.println(PrintMessage.get("데이터베이스 서버를 등록합니다... 완료", "info"));
 
         MiniUtils.pause(1000);
 
         // icons
-        String waiting = ColorText.text("[ ", "whie", "none", false) + ColorText.text("●", "gray", "none", false) + ColorText.text(" ]", "whie", "none", false);
-        String connecting = ColorText.text("[ ", "whie", "none", false) + ColorText.text("●", "yellow", "none", false) + ColorText.text(" ]", "whie", "none", false);
-        String offline = ColorText.text("[ ", "whie", "none", false) + ColorText.text("●", "red", "none", false) + ColorText.text(" ]", "whie", "none", false);
-        String online = ColorText.text("[ ", "whie", "none", false) + ColorText.text("●", "green", "none", false) + ColorText.text(" ]", "whie", "none", false);
+        String waiting = ColorText.text("[ ", "white", "none", false) + ColorText.text("●", "gray", "none", false) + ColorText.text(" ]", "white", "none", false);
+        String connecting = ColorText.text("[ ", "white", "none", false) + ColorText.text("●", "yellow", "none", false) + ColorText.text(" ]", "white", "none", false);
+        String offline = ColorText.text("[ ", "white", "none", false) + ColorText.text("●", "red", "none", false) + ColorText.text(" ]", "white", "none", false);
+        String online = ColorText.text("[ ", "white", "none", false) + ColorText.text("●", "green", "none", false) + ColorText.text(" ]", "white", "none", false);
 
         MiniUtils.clearConsole();
         List<String> serverstatus = new ArrayList<>();
@@ -66,25 +72,41 @@ public class Main {
 
             URL url = new URI(urllist.get(idx)).toURL();
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            if (connection.getResponseCode() == 200) {
-                str = online +
-                        ColorText.text(" 온라인     ", "green", "none", true) +
-                        " | " +
-                        i.split("/")[i.split("/").length - 1] +
-                        System.lineSeparator();
-            } else {
+            connection.setConnectTimeout(5000);
+            try {
+                if (connection.getResponseCode() == 200) {
+                    str = online +
+                            ColorText.text(" 온라인     ", "green", "none", true) +
+                            " | " +
+                            i.split("/")[i.split("/").length - 1] +
+                            System.lineSeparator();
+                } else {
+                    str = offline +
+                            ColorText.text(" 오프라인   ", "red", "none", true) +
+                            " | " +
+                            i.split("/")[i.split("/").length - 1] +
+                            System.lineSeparator();
+                    serveroffline = true;
+                }
+                serverstatus.remove(idx);
+                serverstatus.add(idx, str);
+
+                MiniUtils.clearConsole();
+                connection_print(serverstatus);
+            } catch (SocketTimeoutException | ConnectException e) {
                 str = offline +
                         ColorText.text(" 오프라인   ", "red", "none", true) +
                         " | " +
                         i.split("/")[i.split("/").length - 1] +
                         System.lineSeparator();
                 serveroffline = true;
-            }
-            serverstatus.remove(idx);
-            serverstatus.add(idx, str);
+                serverstatus.remove(idx);
+                serverstatus.add(idx, str);
 
-            MiniUtils.clearConsole();
-            connection_print(serverstatus);
+                MiniUtils.clearConsole();
+                connection_print(serverstatus);
+//                PrintMessage.Error(1, "0002", "Connection Timed out. 서버가 오프라인이거나 인터넷 연결이 불안정합니다.");
+            }
         }
 
         if (serveroffline) {
@@ -94,13 +116,57 @@ public class Main {
         }
 
         System.out.println(PrintMessage.get("서버와 성공적으로 연결되었습니다.", "info"));
+        System.out.println(PrintMessage.get("자동로그인 여부를 확인중입니다...", "info"));
         MiniUtils.pause(800);
-        MiniUtils.clearConsole();
 
-        // TODO : 로그인 창
+        File f = new File(System.getProperty("user.dir") + File.separator + "autologin.dat");
+
+        String a = ColorText.text("A", "blue", "none", true);
+        String m = ColorText.text("M", "blue", "none", true);
+        String s = ColorText.text("S", "blue", "none", true);
+
+        do {
+            MiniUtils.clearConsole();
+            System.out.println(PrintMessage.get("프로그램의 정상적인 사용을 위하여 항상 최신 버전으로 유지해주시기 바랍니다.", "warning"));
+            System.out.println();
+            System.out.println("         " + a + ColorText.text("irwhale ", "gray", "none", false) + a + ColorText.text("ircraft ", "gray", "none", false) + m + ColorText.text("anagement ", "gray", "none", false) + s + ColorText.text("ystem", "gray", "none", false));
+            System.out.println("---------- [ 에어웨일 항공기 관리 시스템 ] ----------");
+            System.out.println();
+            System.out.println("Current : v." + ColorText.text(version, "green", "none", true));
+            System.out.println(ColorText.text("Copyright 2024. Airwhale all rights reserved.", "gray", "none", true));
+            System.out.println();
+            System.out.println(ColorText.text("* 에어웨일에 오신 것을 환영합니다! 입사시에 받으신 사원번호와 비밀번호로 로그인해 주세요!", "cyan", "none", false));
+            System.out.println(ColorText.text("* 종료하시려면 사원번호 입력란에 'q'를 입력하세요", "cyan", "none", false));
+            System.out.print(ColorText.text("사원번호 : ", "green", "none", false));
+
+            if (f.exists()) {
+                try {
+                    JSONParser parser = new JSONParser();
+                    JSONObject obj = (JSONObject) parser.parse(new FileReader(f));
+                    String id = obj.get("id").toString();
+                    String pwd = obj.get("pwd").toString();
+                    System.out.println(ColorText.text(id, "black", "white", false));
+                } catch (ParseException e) {
+                    if (f.delete()) PrintMessage.Error(1, "0001", "autologin.dat", true);
+                }
+            } else {
+                String id = scan.nextLine();
+                if (id.equals("q") | id.equals("Q")) {
+                    System.out.println(PrintMessage.get("시스템을 종료합니다...", "info"));
+                    System.exit(0);
+                }
+
+                System.out.print(ColorText.text("비밀번호 : ", "green", "none", false));
+                String pwd_org = scan.nextLine();
+                String pwd = MiniUtils.encrypt(pwd_org);
+                System.out.println(PrintMessage.get("로그인을 시도중입니다...", "info"));
+
+            }
+
+        } while (true);
     }
 
-    public static void connection_print(List<String> serverstatus) {
+    private static void connection_print(List<String> serverstatus) {
         System.out.println(PrintMessage.get("서버와 통신을 시도중입니다. 잠시만 기다려 주십시오...", "info"));
         System.out.println("==========[ Server Connection Check ]==========");
         StringBuilder str = new StringBuilder();
