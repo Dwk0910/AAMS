@@ -10,11 +10,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.ArrayList;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.HttpURLConnection;
-
 import org.airwhale.aams.utils.ColorText;
 import org.airwhale.aams.utils.MiniUtils;
 import org.airwhale.aams.utils.PrintMessage;
