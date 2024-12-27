@@ -10,6 +10,11 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.ArrayList;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.HttpURLConnection;
+
 import org.airwhale.aams.utils.ColorText;
 import org.airwhale.aams.utils.MiniUtils;
 import org.airwhale.aams.utils.PrintMessage;
@@ -25,14 +30,22 @@ public class Main {
         System.out.println(PrintMessage.get("Airwhale Aircraft Management System [ " + version + " ]", "info"));
         System.out.format(PrintMessage.get("데이터베이스 서버를 등록합니다...", "info") + "\r");
 
+        /*
+        추후 :
+            기능 사용시 해당 기능에 필요한 서버만 검사함.
+            ex) 로그인 시 : Login.php만 검사, 메일 확인 시 : SysMail.php만 검사 등등...
+
+            일부 서버가 오프라인이여도 AAMS 이용이 가능하게 된다.
+         */
+
         List<String> urllist = new ArrayList<>();
         String urlhost = "https://port-9000-aamsbackend-m55ddohi02e930d2.sel4.cloudtype.app/";
-        urllist.add("https://dslwiki.kro.kr/backend/aams/Login.php");
-        urllist.add("https://dslwiki.kro.kr/backend/aams/Notification.php");
-        urllist.add("https://dslwiki.kro.kr/backend/aams/SysMail.php");
-        urllist.add("https://dslwiki.kro.kr/backend/aams/AAMS_update.php");
-        urllist.add("https://dslwiki.kro.kr/backend/aams/Aircrafts.php");
-        urllist.add("https://dslwiki.kro.kr/backend/aams/Employees.php");
+        urllist.add(urlhost + "Login.php");
+        urllist.add(urlhost + "Notification.php");
+        urllist.add(urlhost + "SysMail.php");
+        urllist.add(urlhost + "AAMS_update.php");
+        urllist.add(urlhost + "Aircrafts.php");
+        urllist.add(urlhost + "Employees.php");
         MiniUtils.pause(500);
         System.out.println(PrintMessage.get("데이터베이스 서버를 등록합니다... 완료", "info"));
 
