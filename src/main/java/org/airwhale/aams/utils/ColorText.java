@@ -30,6 +30,7 @@ public class ColorText {
 
         if (!background.isEmpty()) {
             switch (background) {
+                case "white" -> result = result.bg(111111);
                 case "red" -> result = result.bgRed();
                 case "green" -> result = result.bgGreen();
                 case "yellow" -> result = result.bgYellow();

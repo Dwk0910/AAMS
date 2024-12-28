@@ -30,12 +30,14 @@ public class PrintMessage {
     ㄴ D-0001C : create 오류
     ㄴ D-0001D : (ParseException) 파일 손상으로 간주
 
-    D-0002 : 서버연결불량 (Http response code 출력하기)
+    D-0002 : 서버연결오류
+    ㄴ D-0002A : Server Connection Timed out
+
+    D-0003 : Local System Error
+    ㄴ D-0003A : Console을 구할 수 없음. (Console == null, PowerShell이나 CMD로 재시도)
 
     - TYPE G (-eneral, 일반적인 경고식 오류) -
-    G-0001류 (TYPE G) : Simdev 프로젝트 설정파일을 찾을 수 없음.
-    ㄴ G-0001A : devinf.dat
-    ㄴ * 추가예정 *
+    G-0001 : IOException 발생
 
     */
 
@@ -67,5 +69,10 @@ public class PrintMessage {
                 }
             }
         }
+    }
+
+    public static void shutDown() {
+        System.out.println(PrintMessage.get("시스템을 종료합니다...", "info"));
+        System.exit(0);
     }
 }
