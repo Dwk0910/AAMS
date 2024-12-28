@@ -1,14 +1,13 @@
 package org.airwhale.aams;
 
+import java.io.Console;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
 import java.net.*;
 
-import java.util.List;
-import java.util.Scanner;
-import java.util.ArrayList;
+import java.util.*;
 
 import org.airwhale.aams.utils.ColorText;
 import org.airwhale.aams.utils.MiniUtils;
@@ -137,6 +136,10 @@ public class Main {
             MiniUtils.clearConsole();
             System.out.println(PrintMessage.get("프로그램의 정상적인 사용을 위하여 항상 최신 버전으로 유지해주시기 바랍니다.", "warning"));
             System.out.println();
+
+            Console console = System.console();
+            if (console == null) PrintMessage.Error(0, "0003A", "Console에서 null값을 반환하였습니다. CMD나 PowerShell등을 이용하여 다시 시도해주세요.");
+
             System.out.println("         " + a + ColorText.text("irwhale ", "gray", "none", false) + a + ColorText.text("ircraft ", "gray", "none", false) + m + ColorText.text("anagement ", "gray", "none", false) + s + ColorText.text("ystem", "gray", "none", false));
             System.out.println("---------- [ 에어웨일 항공기 관리 시스템 ] ----------");
             System.out.println();
@@ -147,30 +150,96 @@ public class Main {
             System.out.println(ColorText.text("* 종료하시려면 사원번호 입력란에 'q'를 입력하세요", "cyan", "none", false));
             System.out.print(ColorText.text("사원번호 : ", "green", "none", false));
 
+            String id = "", pwd = "";
+
             if (f.exists()) {
                 try {
                     JSONParser parser = new JSONParser();
                     JSONObject obj = (JSONObject) parser.parse(new FileReader(f));
-                    String id = obj.get("id").toString();
-                    String pwd = obj.get("pwd").toString();
+                    id = obj.get("id").toString();
+                    pwd = obj.get("pwd").toString();
                     System.out.println(ColorText.text(id, "black", "white", false));
                 } catch (ParseException e) {
                     if (f.delete()) PrintMessage.Error(1, "0001", "autologin.dat", true);
                 }
             } else {
-                String id = scan.nextLine();
-                if (id.equals("q") | id.equals("Q")) {
-                    System.out.println(PrintMessage.get("시스템을 종료합니다...", "info"));
-                    System.exit(0);
+                id = scan.nextLine();
+                if (id.equals("q") | id.equals("Q")) PrintMessage.shutDown();
+
+                // For developer
+                else if (id.equals("newid")) {
+                    System.out.print("ID : ");
+                    String newid = scan.nextLine();
+                    System.out.print("PWD : ");
+                    String newpwd = scan.nextLine();
+                    System.out.print("NAME : ");
+                    String newname = scan.nextLine();
+
+                    Map<String, String> params = new HashMap<>();
+                    params.put("id", newid);
+                    params.put("pwd", MiniUtils.encrypt(newpwd));
+                    params.put("name", newname);
+
+                    JSONObject response = MiniUtils.serverPostConnection(new URI(urlhost + "Login.php?type=create").toURL(), params);
+                    if (!(boolean) response.get("status")) {
+                        System.out.println("ERROR : " + response.get("cause"));
+                        MiniUtils.pause(2000);
+                    }
+
+                    continue;
+                } else if (id.equals("delid")) {
+                     System.out.print("ID : ");
+                     String typedid = scan.nextLine();
+                     if (MiniUtils.ask("Confirm Delete ID " + typedid + "?")) {
+                         Map<String, String> params = new HashMap<>();
+                         params.put("id", typedid);
+
+                         JSONObject response = MiniUtils.serverPostConnection(new URI(urlhost + "Login.php?type=delete").toURL(), params);
+                         if (!(boolean) response.get("status")) {
+                             System.out.println("ERROR : " + response.get("cause"));
+                             MiniUtils.pause(2000);
+                         }
+                     }
+
+                     continue;
                 }
 
                 System.out.print(ColorText.text("비밀번호 : ", "green", "none", false));
-                String pwd_org = scan.nextLine();
-                String pwd = MiniUtils.encrypt(pwd_org);
-                System.out.println(PrintMessage.get("로그인을 시도중입니다...", "info"));
+                char[] pwd_org_ary = Objects.requireNonNull(console).readPassword();
 
+                StringBuilder sb = new StringBuilder();
+                for (char i : pwd_org_ary) sb.append(i);
+
+                String pwd_org = sb.toString();
+                pwd = MiniUtils.encrypt(pwd_org);
+                System.out.println(PrintMessage.get("로그인을 시도중입니다...", "info"));
             }
 
+            // Request Login
+            Map<String, String> params = new HashMap<>();
+            params.put("id", id);
+            params.put("pwd", pwd);
+
+            JSONObject response = MiniUtils.serverPostConnection(new URI(urlhost + "Login.php").toURL(), params);
+            if ((boolean) response.get("status")) break;
+            else {
+                switch ((String) response.get("cause")) {
+                    case "idpwdincorrect" -> {
+                        System.out.println(PrintMessage.get("아이디 또는 비밀번호가 잘못되었습니다. 이 메시지는 2초 후 사라집니다.", "error"));
+                        MiniUtils.pause(2000);
+                    }
+
+                    case "Key incorrect" -> {
+                        System.out.println(PrintMessage.get("AAMS internal error : Key incorrect", "error"));
+                        System.exit(-1);
+                    }
+
+                    default -> {
+                        System.out.println(PrintMessage.get("백엔드 서버에서 예상하지 못한 응답을 보냈습니다. 관리자에게 문의해주세요 : " + response.get("cause"), "error"));
+                        System.exit(-1);
+                    }
+                }
+            }
         } while (true);
     }
 

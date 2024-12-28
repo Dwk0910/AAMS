@@ -33,6 +33,9 @@ public class PrintMessage {
     D-0002 : 서버연결오류
     ㄴ D-0002A : Server Connection Timed out
 
+    D-0003 : Local System Error
+    ㄴ D-0003A : Console을 구할 수 없음. (Console == null, PowerShell이나 CMD로 재시도)
+
     - TYPE G (-eneral, 일반적인 경고식 오류) -
     G-0001 : IOException 발생
 
@@ -66,5 +69,10 @@ public class PrintMessage {
                 }
             }
         }
+    }
+
+    public static void shutDown() {
+        System.out.println(PrintMessage.get("시스템을 종료합니다...", "info"));
+        System.exit(0);
     }
 }
