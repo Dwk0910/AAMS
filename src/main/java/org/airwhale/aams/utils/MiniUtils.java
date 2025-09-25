@@ -5,10 +5,12 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 

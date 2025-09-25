@@ -150,17 +150,26 @@ public class Main {
             System.out.println(ColorText.text("* 종료하시려면 사원번호 입력란에 'q'를 입력하세요", "cyan", "none", false));
             System.out.print(ColorText.text("사원번호 : ", "green", "none", false));
 
-            String id = "", pwd = "";
+            boolean by_autologin = false;
+            String id, pwd;
 
             if (f.exists()) {
+                by_autologin = true;
                 try {
                     JSONParser parser = new JSONParser();
                     JSONObject obj = (JSONObject) parser.parse(new FileReader(f));
                     id = obj.get("id").toString();
                     pwd = obj.get("pwd").toString();
+                    if (id == null | pwd == null) {
+                        if (!f.delete()) PrintMessage.Error(0, "0001", "autologin.dat");
+                        continue;
+                    }
+
                     System.out.println(ColorText.text(id, "black", "white", false));
+                    System.out.println(PrintMessage.get("자동로그인 정보를 입력중입니다. 잠시만 기다려 주십시오...", "info"));
                 } catch (ParseException e) {
-                    if (f.delete()) PrintMessage.Error(1, "0001", "autologin.dat", true);
+                    if (!f.delete()) PrintMessage.Error(0, "0001", "autologin.dat", true);
+                    continue;
                 }
             } else {
                 id = scan.nextLine();
@@ -212,10 +221,10 @@ public class Main {
 
                 String pwd_org = sb.toString();
                 pwd = MiniUtils.encrypt(pwd_org);
-                System.out.println(PrintMessage.get("로그인을 시도중입니다...", "info"));
             }
 
             // Request Login
+            System.out.println(PrintMessage.get("로그인을 시도중입니다...", "info"));
             Map<String, String> params = new HashMap<>();
             params.put("id", id);
             params.put("pwd", pwd);
@@ -225,6 +234,12 @@ public class Main {
             else {
                 switch ((String) response.get("cause")) {
                     case "idpwdincorrect" -> {
+                        // Autologin.dat에 의한 로그인일 시 -> 잘못된 데이터가 들어가있는 것이므로 삭제.
+                        if (by_autologin) {
+                            if (!f.delete()) PrintMessage.Error(0, "0001", "autologin.dat");
+                            continue;
+                        }
+
                         System.out.println(PrintMessage.get("아이디 또는 비밀번호가 잘못되었습니다. 이 메시지는 2초 후 사라집니다.", "error"));
                         MiniUtils.pause(2000);
                     }
